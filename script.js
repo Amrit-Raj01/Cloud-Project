@@ -1,28 +1,28 @@
 /* =========================================================
    FileVault – Frontend Logic
-   All DOM / browser code lives here. No server logic.
+   window.location.origin se auto IP/domain detect karta hai
    ========================================================= */
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = window.location.origin + "/api";
 
-// ── DOM References ─────────────────────────────────────────
-const dropzone       = document.getElementById("dropzone");
-const fileInput      = document.getElementById("fileInput");
-const filePreview    = document.getElementById("filePreview");
+// DOM References
+const dropzone        = document.getElementById("dropzone");
+const fileInput       = document.getElementById("fileInput");
+const filePreview     = document.getElementById("filePreview");
 const filePreviewName = document.getElementById("filePreviewName");
 const filePreviewSize = document.getElementById("filePreviewSize");
-const uploadBtn      = document.getElementById("uploadBtn");
-const progressWrap   = document.getElementById("progressWrap");
-const progressBar    = document.getElementById("progressBar");
-const uploadAlert    = document.getElementById("uploadAlert");
-const refreshBtn     = document.getElementById("refreshBtn");
-const fileList       = document.getElementById("fileList");
-const loadingState   = document.getElementById("loadingState");
-const emptyState     = document.getElementById("emptyState");
+const uploadBtn       = document.getElementById("uploadBtn");
+const progressWrap    = document.getElementById("progressWrap");
+const progressBar     = document.getElementById("progressBar");
+const uploadAlert     = document.getElementById("uploadAlert");
+const refreshBtn      = document.getElementById("refreshBtn");
+const fileList        = document.getElementById("fileList");
+const loadingState    = document.getElementById("loadingState");
+const emptyState      = document.getElementById("emptyState");
 
 let selectedFile = null;
 
-// ── Utilities ──────────────────────────────────────────────
+// Utilities
 function formatBytes(bytes) {
   if (bytes === 0) return "0 B";
   const k = 1024;
@@ -45,9 +45,8 @@ function getFileIcon(mimetype) {
   if (mimetype.startsWith("audio/"))       return "🎵";
   if (mimetype === "application/pdf")      return "📕";
   if (mimetype.includes("zip") || mimetype.includes("compressed")) return "🗜️";
-  if (mimetype.includes("word") || mimetype.includes("document"))  return "📝";
+  if (mimetype.includes("word"))           return "📝";
   if (mimetype.includes("spreadsheet") || mimetype.includes("excel")) return "📊";
-  if (mimetype.includes("presentation") || mimetype.includes("powerpoint")) return "📽️";
   if (mimetype.startsWith("text/"))        return "📃";
   return "📄";
 }
@@ -55,59 +54,45 @@ function getFileIcon(mimetype) {
 function showAlert(message, type = "success") {
   uploadAlert.textContent = message;
   uploadAlert.className = `alert show ${type}`;
-  setTimeout(() => {
-    uploadAlert.className = "alert";
-  }, 4000);
+  setTimeout(() => { uploadAlert.className = "alert"; }, 4000);
 }
 
-// ── File Selection ─────────────────────────────────────────
+// File Selection
 function handleFileSelection(file) {
   if (!file) return;
   selectedFile = file;
-
   filePreviewName.textContent = file.name;
   filePreviewSize.textContent = formatBytes(file.size);
   filePreview.style.display = "flex";
   uploadBtn.disabled = false;
 }
 
-fileInput.addEventListener("change", () => {
-  handleFileSelection(fileInput.files[0]);
-});
+fileInput.addEventListener("change", () => handleFileSelection(fileInput.files[0]));
 
-// Drag & Drop
 dropzone.addEventListener("dragover", (e) => {
   e.preventDefault();
   dropzone.classList.add("drag-over");
 });
-
-dropzone.addEventListener("dragleave", () => {
-  dropzone.classList.remove("drag-over");
-});
-
+dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
 dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
   dropzone.classList.remove("drag-over");
   const file = e.dataTransfer.files[0];
-  if (file) {
-    handleFileSelection(file);
-  }
+  if (file) handleFileSelection(file);
 });
 
-// ── Upload File ────────────────────────────────────────────
+// Upload File
 uploadBtn.addEventListener("click", async () => {
   if (!selectedFile) return;
 
   const formData = new FormData();
   formData.append("file", selectedFile);
 
-  // Show progress
   uploadBtn.disabled = true;
   uploadBtn.textContent = "Uploading…";
   progressWrap.style.display = "block";
   progressBar.style.width = "0%";
 
-  // Fake progress animation
   let progress = 0;
   const progressInterval = setInterval(() => {
     progress = Math.min(progress + Math.random() * 15, 85);
@@ -141,7 +126,6 @@ uploadBtn.addEventListener("click", async () => {
       progressWrap.style.display = "none";
       progressBar.style.width = "0%";
     }, 600);
-
     uploadBtn.disabled = false;
     uploadBtn.innerHTML = '<span class="btn-icon">⬆</span> Upload File';
   }
@@ -154,7 +138,7 @@ function resetUploadForm() {
   uploadBtn.disabled = true;
 }
 
-// ── Fetch Files ────────────────────────────────────────────
+// Fetch Files
 async function fetchFiles() {
   loadingState.style.display = "block";
   emptyState.style.display = "none";
@@ -166,13 +150,7 @@ async function fetchFiles() {
 
     loadingState.style.display = "none";
 
-    if (!data.success) {
-      emptyState.style.display = "block";
-      emptyState.querySelector("p").textContent = "Failed to load files.";
-      return;
-    }
-
-    if (!data.files || data.files.length === 0) {
+    if (!data.success || !data.files || data.files.length === 0) {
       emptyState.style.display = "block";
       emptyState.querySelector("p").textContent = "No files uploaded yet.";
       return;
@@ -187,15 +165,13 @@ async function fetchFiles() {
   }
 }
 
-// ── Render Files ───────────────────────────────────────────
+// Render Files
 function renderFiles(files) {
   fileList.innerHTML = "";
-
   files.forEach((file) => {
     const li = document.createElement("li");
     li.className = "file-item";
     li.dataset.id = file._id;
-
     li.innerHTML = `
       <div class="file-type-icon">${getFileIcon(file.mimetype)}</div>
       <div class="file-info">
@@ -207,27 +183,23 @@ function renderFiles(files) {
         </div>
       </div>
       <div class="file-actions">
-        <a href="/uploads/${encodeURIComponent(file.filename)}" 
+        <a href="/uploads/${encodeURIComponent(file.filename)}"
            download="${escapeHtml(file.originalName)}"
            class="btn btn-download">⬇ Download</a>
         <button class="btn btn-danger" onclick="deleteFile('${file._id}')">🗑 Delete</button>
       </div>
     `;
-
     fileList.appendChild(li);
   });
-
   fileList.style.display = "flex";
 }
 
-// ── Delete File ────────────────────────────────────────────
+// Delete File
 async function deleteFile(id) {
   if (!confirm("Are you sure you want to delete this file?")) return;
-
   try {
     const response = await fetch(`${API_BASE}/files/${id}`, { method: "DELETE" });
     const data = await response.json();
-
     if (data.success) {
       const item = document.querySelector(`.file-item[data-id="${id}"]`);
       if (item) {
@@ -237,22 +209,21 @@ async function deleteFile(id) {
         setTimeout(() => fetchFiles(), 300);
       }
     } else {
-      alert("Failed to delete file: " + (data.message || "Unknown error"));
+      alert("Failed to delete: " + (data.message || "Unknown error"));
     }
   } catch (error) {
-    console.error("Delete error:", error);
     alert("Network error. Could not delete file.");
   }
 }
 
-// ── Helpers ────────────────────────────────────────────────
+// Helpers
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
 }
 
-// ── Refresh Button ─────────────────────────────────────────
+// Refresh Button
 refreshBtn.addEventListener("click", () => {
   refreshBtn.textContent = "↻ Refreshing…";
   refreshBtn.disabled = true;
@@ -262,5 +233,5 @@ refreshBtn.addEventListener("click", () => {
   });
 });
 
-// ── Init ───────────────────────────────────────────────────
+// Init
 fetchFiles();
