@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileVault – Upload & Manage Files</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-wrapper">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-inner">
+          <div class="logo">
+            <span class="logo-icon">⬆</span>
+            <span class="logo-text">FileVault</span>
+          </div>
+          <p class="header-subtitle">Upload, store & manage your files securely</p>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main">
+
+        <!-- Upload Card -->
+        <section class="card upload-card">
+          <h2 class="card-title">Upload a File</h2>
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-icon">📂</div>
+            <p class="dropzone-text">Drag & drop your file here</p>
+            <p class="dropzone-subtext">or click to browse</p>
+            <input type="file" id="fileInput" class="file-input" />
+          </div>
+          <div class="file-preview" id="filePreview" style="display:none;">
+            <span class="file-preview-icon">📄</span>
+            <span class="file-preview-name" id="filePreviewName"></span>
+            <span class="file-preview-size" id="filePreviewSize"></span>
+          </div>
+          <button class="btn btn-primary" id="uploadBtn" disabled>
+            <span class="btn-icon">⬆</span> Upload File
+          </button>
+          <div class="progress-wrap" id="progressWrap" style="display:none;">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="alert" id="uploadAlert"></div>
+        </section>
+
+        <!-- Files List Card -->
+        <section class="card files-card">
+          <div class="files-header">
+            <h2 class="card-title">Uploaded Files</h2>
+            <button class="btn btn-outline btn-sm" id="refreshBtn" title="Refresh">↻ Refresh</button>
+          </div>
+          <div id="filesContainer">
+            <div class="loading" id="loadingState">
+              <div class="spinner"></div>
+              <p>Loading files…</p>
+            </div>
+            <div class="empty-state" id="emptyState" style="display:none;">
+              <span class="empty-icon">🗂️</span>
+              <p>No files uploaded yet.</p>
+            </div>
+            <ul class="file-list" id="fileList" style="display:none;"></ul>
+          </div>
+        </section>
+
+      </main>
+
+      <footer class="footer">
+        <p>FileVault &copy; 2025 &mdash; Built with Node.js, Express &amp; MongoDB</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
